@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>ToDoリスト</h1>
+  <form action="#">
+    <label for="all">
+      <input type="radio" id="all" name="sort" value="all" checked>すべて
+    </label>
+    <label for="working">
+      <input type="radio" id="working" value="working" name="sort">作業中
+    </label>
+    <label for="done">
+      <input type="radio" id="done" value="done" name="sort">完了
+    </label>
+    <p style="font-weight: bold;">ID コメント 状態</p>
+    <ul id="tasklist" style="list-style: none;padding: 0;">
+    </ul>
+    <h2>新規タスクの追加</h2>
+    <input id="task-textbox" type="text">
+    <button id="add-btn">追加</button>
+  </form>
+  <script>
+    'use strict'
+    {
+      //DOMから要素を必要な要素取得とタスクを配列管理
+      const addTaskBtn = document.getElementById('add-btn');
+      const textBox = document.getElementById('task-textbox');
+      const taskList = document.getElementById('tasklist');
+      const addTaskList = [];
+
+      // 関数まとめ
+      //li要素を全部消してリセット
+      function liCheck() {
+        const liCheck = document.querySelector('li') != null;
+        if (liCheck === true) {
+          taskList.innerHTML = '';
+        };
+      };
+      // タスクオブジェクトの表示
+      function showList() {
+        for (let i = 0; i < addTaskList.length; i++) {
+          // ulの子要素にliを作成とliの位置確認
+          const li = document.createElement('li');
+          li.textContent = `${i} ${addTaskList[i].task}`;
+          taskList.appendChild(li);
+          const taskListLi = document.querySelectorAll('li')[i];
+          // liの中に２つのボタン追加
+          const workBtn = document.createElement('button');
+          workBtn.setAttribute('class', 'workbtn');
+          workBtn.textContent = '作業中';
+          const deleteBtn = document.createElement('button');
+          deleteBtn.setAttribute('class', 'deletebtn');
+          deleteBtn.textContent = '削除';
+          taskListLi.appendChild(workBtn);
+          taskListLi.appendChild(deleteBtn);
+        };
+      };
+
+      //追加ボタンクリックでイベント発生
+      addTaskBtn.addEventListener('click', () => {
+        // タスクをオブジェクトと配列管理
+        function addList(text) {
+          const addTask = { task: text };
+          addTaskList.push(addTask);
+        }
+        addList(textBox.value);
+        console.log(addTaskList);//テスト
+        //li要素を全部消してリセット
+        liCheck();
+        // タスクオブジェクトの表示
+        showList();
+      });
+
+      //削除ボタンクリックで要素とオブジェクト削除
+      taskList.addEventListener('click', e => {
+        // クリックされた親要素を取得
+        let deleteElement = e.target.parentNode;
+        // ul内のli要素がいくつあるかカウント
+        let liCount = taskList.childElementCount;
+        if (e.target.className === 'deletebtn') {
+          deleteElement.remove();
+          addTaskList.splice(liCount - 1, 1);
+          liCheck();
+          showList();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
