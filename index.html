@@ -10,6 +10,12 @@
       width: 60px;
     }
 
+    .task-index {
+      display: inline-block;
+      width: 20px;
+      margin: 0;
+    }
+
     .tasklist-item__text {
       display: inline-block;
       width: 90px;
@@ -47,12 +53,17 @@
       const addTaskList = [];
 
       // 関数まとめ
-      //li要素を全部消してリセット
+      //li要素を全部消してリセットとli要素があった場合、li要素のテキストの幅を取得する
       function liCheck() {
-        const liCheck = document.getElementsByClassName('tasklist-item') != null;
+        const liCheck = document.querySelector('.tasklist-item') != null;
         if (liCheck === true) {
+          let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
+          let taskTextStyle = window.getComputedStyle(taskTexts[0], '');//指定した要素のstyle情報取得
+          let taskTextScale = taskTextStyle.getPropertyValue('width');//widhtの値を検出
+          console.log(taskTextScale);//テスト
           taskList.innerHTML = '';
-        };
+          return taskTextScale;
+        }
       };
       // タスクオブジェクトを繰り返し表示
       function showList() {
@@ -60,10 +71,14 @@
           // ulの子要素にliを作成とliの位置確認
           const li = document.createElement('li');
           li.setAttribute('class', 'tasklist-item');
-          const p = document.createElement('p');
-          p.setAttribute('class', 'tasklist-item__text');
-          li.appendChild(p);
-          p.textContent = `${i} ${addTaskList[i].task}`;
+          const p1 = document.createElement('p');
+          p1.setAttribute('class', 'task-index');
+          li.appendChild(p1);
+          p1.textContent = i;
+          const p2 = document.createElement('p');
+          p2.setAttribute('class', 'tasklist-item__text');
+          li.appendChild(p2);
+          p2.textContent = addTaskList[i].task;
           taskList.appendChild(li);
           const taskListLi = document.querySelectorAll('#tasklist li')[i];
           // liの中に２つのボタン追加
@@ -78,6 +93,16 @@
           taskListLi.appendChild(deleteBtn);
         };
       };
+      //リセット前にliが有り、タスク追加時にliテキストの幅を初期値から戻す
+      function returnScale(text) {
+        if (text === undefined) {
+        } else {
+          let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
+          for (let i = 0; i < taskTexts.length; i++) {
+            taskTexts[i].style.width = text;
+          };
+        };
+      }
 
       //追加ボタンクリックでタスク追加
       addTaskBtn.addEventListener('click', () => {
@@ -85,11 +110,12 @@
         function addList(text) {
           const addTask = { task: text };
           addTaskList.push(addTask);
-        }
+        };
         addList(textBox.value);
-        liCheck();//li要素を全部消してリセット
+        let scale = liCheck();//リセットする前のテキストの幅を取得とli要素を全部消してリセット
+        console.log(scale);//テスト
         showList();// タスクオブジェクトの表示
-        console.log(addTaskList);
+        returnScale(scale);//リセット前にliが有り、タスク追加時にliテキストの幅を初期値から戻す
 
         // タスクのテキスト文字数に応じてテキストスケールの幅を増やす
         let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
@@ -97,11 +123,11 @@
         let taskTextScale = taskTextStyle.getPropertyValue('width');//widhtの値を検出
         let widthNumber = parseInt(taskTextScale);//単位を除去
         let textLength = textBox.value.length;//テキストボックスに何文字あるか検出
-        let textScale = textLength * 20;//文字入力に応じて値を増やす
+        let textScale = textLength * 20;//テキストボックスの文字入力に応じて値を増やす
         function taskScaleAdjust() {
           if (textScale > widthNumber) {
             const status = document.querySelector('.status-text');
-            status.style.paddingLeft = (textScale - 90) + 'px';
+            status.style.paddingLeft = (textScale - 70) + 'px';
             for (let i = 0; i < taskTexts.length; i++) {
               taskTexts[i].style.width = textScale + 'px';
             }
@@ -116,13 +142,15 @@
       taskList.addEventListener('click', e => {
         let deleteElement = e.target.parentNode;// クリックされた親要素を取得
         if (e.target.className === 'deletebtn') {
-          deleteElement.remove();//クリックされた親要素削除
           let taskItemLists = Array.from(document.querySelectorAll('.tasklist-item'));//htmlコレクションを配列化
+          console.log(taskItemLists);
           const index = taskItemLists.findIndex(list => list === deleteElement);//クリックされた親要素（li）が何番目か検出
+          console.log(index);
           addTaskList.splice(index, 1);//クリックされたオブジェクト削除
-          liCheck();//li要素を全部消してリセット
+          deleteElement.remove();//クリックされた親要素削除
+          let scale = liCheck();//li要素を全部消してリセット
           showList();// タスクオブジェクトの表示
-          console.log(addTaskList);
+          returnScale(scale);
         } else if (e.target.className = 'workbtn') {
           if (e.target.textContent === '作業中') {
             e.target.textContent = '完了';
