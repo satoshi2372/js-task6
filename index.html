@@ -4,6 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <style>
+    .workbtn {
+      margin-right: 10px;
+      width: 60px;
+    }
+
+    .tasklist-item__text {
+      display: inline-block;
+      width: 90px;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
   <h1>ToDoリスト</h1>
@@ -17,42 +29,47 @@
     <label for="done">
       <input type="radio" id="done" value="done" name="sort">完了
     </label>
-    <p style="font-weight: bold;">ID コメント 状態</p>
+    <p style="font-weight: bold;">ID コメント <span class="status-text">状態</span></p>
     <ul id="tasklist" style="list-style: none;padding: 0;">
     </ul>
     <h2>新規タスクの追加</h2>
     <input id="task-textbox" type="text">
-    <button id="add-btn">追加</button>
+    <input id="add-btn" type="submit" value="追加">
   </form>
   <script>
     'use strict'
     {
+      //js課題③
       //DOMから要素を必要な要素取得とタスクを配列管理
       const addTaskBtn = document.getElementById('add-btn');
       const textBox = document.getElementById('task-textbox');
       const taskList = document.getElementById('tasklist');
       const addTaskList = [];
 
-      //js課題③
       // 関数まとめ
       //li要素を全部消してリセット
       function liCheck() {
-        const liCheck = document.querySelector('li') != null;
+        const liCheck = document.getElementsByClassName('tasklist-item') != null;
         if (liCheck === true) {
           taskList.innerHTML = '';
         };
       };
-      // タスクオブジェクトの表示
+      // タスクオブジェクトを繰り返し表示
       function showList() {
         for (let i = 0; i < addTaskList.length; i++) {
           // ulの子要素にliを作成とliの位置確認
           const li = document.createElement('li');
-          li.textContent = `${i} ${addTaskList[i].task}`;
+          li.setAttribute('class', 'tasklist-item');
+          const p = document.createElement('p');
+          p.setAttribute('class', 'tasklist-item__text');
+          li.appendChild(p);
+          p.textContent = `${i} ${addTaskList[i].task}`;
           taskList.appendChild(li);
-          const taskListLi = document.querySelectorAll('li')[i];
+          const taskListLi = document.querySelectorAll('#tasklist li')[i];
           // liの中に２つのボタン追加
           const workBtn = document.createElement('button');
           workBtn.setAttribute('class', 'workbtn');
+          workBtn.classList.add('working')
           workBtn.textContent = '作業中';
           const deleteBtn = document.createElement('button');
           deleteBtn.setAttribute('class', 'deletebtn');
@@ -62,7 +79,7 @@
         };
       };
 
-      //追加ボタンクリックでイベント発生
+      //追加ボタンクリックでタスク追加
       addTaskBtn.addEventListener('click', () => {
         // タスクをオブジェクトと配列管理
         function addList(text) {
@@ -70,25 +87,87 @@
           addTaskList.push(addTask);
         }
         addList(textBox.value);
-        console.log(addTaskList);//テスト
-        //li要素を全部消してリセット
-        liCheck();
-        // タスクオブジェクトの表示
-        showList();
+        liCheck();//li要素を全部消してリセット
+        showList();// タスクオブジェクトの表示
+        console.log(addTaskList);
+
+        // タスクのテキスト文字数に応じてテキストスケールの幅を増やす
+        let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
+        let taskTextStyle = window.getComputedStyle(taskTexts[0], '');//指定した要素のstyle情報取得
+        let taskTextScale = taskTextStyle.getPropertyValue('width');//widhtの値を検出
+        let widthNumber = parseInt(taskTextScale);//単位を除去
+        let textLength = textBox.value.length;//テキストボックスに何文字あるか検出
+        let textScale = textLength * 20;//文字入力に応じて値を増やす
+        function taskScaleAdjust() {
+          if (textScale > widthNumber) {
+            const status = document.querySelector('.status-text');
+            status.style.paddingLeft = (textScale - 90) + 'px';
+            for (let i = 0; i < taskTexts.length; i++) {
+              taskTexts[i].style.width = textScale + 'px';
+            }
+          }
+        };
+        taskScaleAdjust();
+        //テキストボックスを空白にする
+        textBox.value = '';
       });
 
-      //削除ボタンクリックで要素とオブジェクト削除
+      //削除ボタンクリックで要素とオブジェクト削除 状態ボタンクリックで状態テキスト変更
       taskList.addEventListener('click', e => {
-        // クリックされた親要素を取得
-        let deleteElement = e.target.parentNode;
-        // ul内のli要素がいくつあるかカウント
-        let liCount = taskList.childElementCount;
+        let deleteElement = e.target.parentNode;// クリックされた親要素を取得
         if (e.target.className === 'deletebtn') {
-          deleteElement.remove();
-          addTaskList.splice(liCount - 1, 1);
-          liCheck();
-          showList();
+          deleteElement.remove();//クリックされた親要素削除
+          let taskItemLists = Array.from(document.querySelectorAll('.tasklist-item'));//htmlコレクションを配列化
+          const index = taskItemLists.findIndex(list => list === deleteElement);//クリックされた親要素（li）が何番目か検出
+          addTaskList.splice(index, 1);//クリックされたオブジェクト削除
+          liCheck();//li要素を全部消してリセット
+          showList();// タスクオブジェクトの表示
+          console.log(addTaskList);
+        } else if (e.target.className = 'workbtn') {
+          if (e.target.textContent === '作業中') {
+            e.target.textContent = '完了';
+            e.target.classList.add('done');
+          } else {
+            e.target.textContent = '作業中';
+            e.target.classList.add('working');
+          }
         }
+      });
+
+      //ラジオボタンクリックで並べ替え
+      //ラジオ要素取得
+      const ladioAll = document.getElementById('all');
+      const ladioWorking = document.getElementById('working');
+      const ladioDone = document.getElementById('done');
+      // 作業中ボタン要素取得
+      const workingBtn = document.getElementsByClassName('working');
+      const doneBtn = document.getElementsByClassName('done')
+      //繰り返し処理まとめ 作業中ボタンの親要素を表示/非表示 完了ボタンの親要素を表示/非表示
+      function workingToggle(text) {
+        for (let i = 0; i < workingBtn.length; i++) {
+          workingBtn[i].parentNode.style.display = text;
+        }
+      }
+      function doneToggle(text) {
+        for (let i = 0; i < doneBtn.length; i++) {
+          doneBtn[i].parentNode.style.display = text;
+        }
+      }
+
+      //すべてradioクリックですべて表示
+      ladioAll.addEventListener('click', () => {
+        workingToggle('block');
+        doneToggle('block');
+      });
+      //作業中radioクリック作業中のみ表示
+      ladioWorking.addEventListener('click', () => {
+        workingToggle('block');
+        doneToggle('none');
+      });
+      //完了radioクリックで完了のみ表示
+      ladioDone.addEventListener('click', () => {
+        workingToggle('none');
+        doneToggle('block');
       });
     }
   </script>
