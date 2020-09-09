@@ -21,6 +21,10 @@
       width: 90px;
       margin: 0;
     }
+
+    .status-text {
+      padding-left: 20px;
+    }
   </style>
 </head>
 <body>
@@ -60,7 +64,6 @@
           let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
           let taskTextStyle = window.getComputedStyle(taskTexts[0], '');//指定した要素のstyle情報取得
           let taskTextScale = taskTextStyle.getPropertyValue('width');//widhtの値を検出
-          console.log(taskTextScale);//テスト
           taskList.innerHTML = '';
           return taskTextScale;
         }
@@ -103,6 +106,15 @@
           };
         };
       }
+      //タスクリストのオブジェクトのtaskプロパティの文字数最大値を検出
+      function maxTextLength() {
+        const liCheck = document.querySelector('.tasklist-item') != null;
+        if (liCheck === true) {
+          let taskLength = Math.max.apply(null, addTaskList.map(function (o) { return o.task.length; }));
+          return taskLength;
+        }
+      };
+
 
       //追加ボタンクリックでタスク追加
       addTaskBtn.addEventListener('click', () => {
@@ -113,23 +125,24 @@
         };
         addList(textBox.value);
         let scale = liCheck();//リセットする前のテキストの幅を取得とli要素を全部消してリセット
-        console.log(scale);//テスト
         showList();// タスクオブジェクトの表示
         returnScale(scale);//リセット前にliが有り、タスク追加時にliテキストの幅を初期値から戻す
 
-        // タスクのテキスト文字数に応じてテキストスケールの幅を増やす
-        let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
-        let taskTextStyle = window.getComputedStyle(taskTexts[0], '');//指定した要素のstyle情報取得
-        let taskTextScale = taskTextStyle.getPropertyValue('width');//widhtの値を検出
-        let widthNumber = parseInt(taskTextScale);//単位を除去
-        let textLength = textBox.value.length;//テキストボックスに何文字あるか検出
-        let textScale = textLength * 20;//テキストボックスの文字入力に応じて値を増やす
+        // task値の文字数に応じてテキストスケールの幅を可変させる
+        let maxLength = maxTextLength();//オブジェクト配列のtaskのプロパティ値のlength取得し最大値を検出する。
+        let textScale = maxLength * 20;//文字数に応じて値を増やす
         function taskScaleAdjust() {
-          if (textScale > widthNumber) {
-            const status = document.querySelector('.status-text');
-            status.style.paddingLeft = (textScale - 70) + 'px';
-            for (let i = 0; i < taskTexts.length; i++) {
+          let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
+          const status = document.querySelector('.status-text');//状態テキスト要素を取得
+          if (textScale > 90) {//文字数が多ければスケールを変更
+            status.style.paddingLeft = (textScale - 70) + 'px';//状態テキスを可変させる
+            for (let i = 0; i < taskTexts.length; i++) {//タスクテキストスケールを変更
               taskTexts[i].style.width = textScale + 'px';
+            }
+          } else {//文字数が少なければ初期値に戻す
+            status.style.paddingLeft = 20 + 'px';
+            for (let i = 0; i < taskTexts.length; i++) {
+              taskTexts[i].style.width = 90 + 'px';
             }
           }
         };
@@ -150,7 +163,7 @@
           deleteElement.remove();//クリックされた親要素削除
           let scale = liCheck();//li要素を全部消してリセット
           showList();// タスクオブジェクトの表示
-          returnScale(scale);
+          returnScale(scale);//リセット前のテキスト幅を検出、テキスト幅を初期値ではなく検出した値にする。
         } else if (e.target.className = 'workbtn') {
           if (e.target.textContent === '作業中') {
             e.target.textContent = '完了';
