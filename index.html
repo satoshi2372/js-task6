@@ -68,6 +68,7 @@
           return taskTextScale;
         }
       };
+
       // タスクオブジェクトを繰り返し表示
       function showList() {
         for (let i = 0; i < addTaskList.length; i++) {
@@ -96,16 +97,7 @@
           taskListLi.appendChild(deleteBtn);
         };
       };
-      //リセット前にliが有り、タスク追加時にliテキストの幅を初期値から戻す
-      function returnScale(text) {
-        if (text === undefined) {
-        } else {
-          let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
-          for (let i = 0; i < taskTexts.length; i++) {
-            taskTexts[i].style.width = text;
-          };
-        };
-      }
+
       //タスクリストのオブジェクトのtaskプロパティの文字数最大値を検出
       function maxTextLength() {
         const liCheck = document.querySelector('.tasklist-item') != null;
@@ -115,6 +107,24 @@
         }
       };
 
+      // task値の文字数に応じてテキストスケールの幅を可変させる
+      function taskScaleAdjust() {
+        let maxLength = maxTextLength();//オブジェクト配列のtaskのプロパティ値のlength取得し最大値を検出する。
+        let textScale = maxLength * 20;//文字数に応じて値を増やす
+        let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
+        const status = document.querySelector('.status-text');//状態テキスト要素を取得
+        if (textScale > 90) {//文字数が多ければスケールを変更
+          status.style.paddingLeft = (textScale - 70) + 'px';//状態テキスを可変させる
+          for (let i = 0; i < taskTexts.length; i++) {//タスクテキストスケールを変更
+            taskTexts[i].style.width = textScale + 'px';
+          }
+        } else {//文字数が少なければ初期値に戻す
+          status.style.paddingLeft = 20 + 'px';
+          for (let i = 0; i < taskTexts.length; i++) {
+            taskTexts[i].style.width = 90 + 'px';
+          }
+        }
+      };
 
       //追加ボタンクリックでタスク追加
       addTaskBtn.addEventListener('click', () => {
@@ -126,27 +136,7 @@
         addList(textBox.value);
         let scale = liCheck();//リセットする前のテキストの幅を取得とli要素を全部消してリセット
         showList();// タスクオブジェクトの表示
-        returnScale(scale);//リセット前にliが有り、タスク追加時にliテキストの幅を初期値から戻す
-
-        // task値の文字数に応じてテキストスケールの幅を可変させる
-        let maxLength = maxTextLength();//オブジェクト配列のtaskのプロパティ値のlength取得し最大値を検出する。
-        let textScale = maxLength * 20;//文字数に応じて値を増やす
-        function taskScaleAdjust() {
-          let taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
-          const status = document.querySelector('.status-text');//状態テキスト要素を取得
-          if (textScale > 90) {//文字数が多ければスケールを変更
-            status.style.paddingLeft = (textScale - 70) + 'px';//状態テキスを可変させる
-            for (let i = 0; i < taskTexts.length; i++) {//タスクテキストスケールを変更
-              taskTexts[i].style.width = textScale + 'px';
-            }
-          } else {//文字数が少なければ初期値に戻す
-            status.style.paddingLeft = 20 + 'px';
-            for (let i = 0; i < taskTexts.length; i++) {
-              taskTexts[i].style.width = 90 + 'px';
-            }
-          }
-        };
-        taskScaleAdjust();
+        taskScaleAdjust();//文字数に応じてタスクテキストスケールを変更する
         //テキストボックスを空白にする
         textBox.value = '';
       });
@@ -154,17 +144,20 @@
       //削除ボタンクリックで要素とオブジェクト削除 状態ボタンクリックで状態テキスト変更
       taskList.addEventListener('click', e => {
         let deleteElement = e.target.parentNode;// クリックされた親要素を取得
-        if (e.target.className === 'deletebtn') {
+        if (e.target.className === 'deletebtn') {//削除ボタンクリック
           let taskItemLists = Array.from(document.querySelectorAll('.tasklist-item'));//htmlコレクションを配列化
-          console.log(taskItemLists);
           const index = taskItemLists.findIndex(list => list === deleteElement);//クリックされた親要素（li）が何番目か検出
-          console.log(index);
+          console.log(index);//テスト
           addTaskList.splice(index, 1);//クリックされたオブジェクト削除
           deleteElement.remove();//クリックされた親要素削除
-          let scale = liCheck();//li要素を全部消してリセット
-          showList();// タスクオブジェクトの表示
-          returnScale(scale);//リセット前のテキスト幅を検出、テキスト幅を初期値ではなく検出した値にする。
-        } else if (e.target.className = 'workbtn') {
+          //削除したらindexの順番を変える
+          function indexRest() {
+            let taskIndex = document.querySelectorAll('.task-index');//タスクindexを管理してるテキストを検出
+            for (let i = 0; i < taskIndex.length; i++) {
+              taskIndex[i].textContent = i;
+            };
+          };
+        } else if (e.target.className = 'workbtn') {//状態ボタンクリック
           if (e.target.textContent === '作業中') {
             e.target.textContent = '完了';
             e.target.classList.add('done');
