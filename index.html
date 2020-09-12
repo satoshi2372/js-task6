@@ -57,42 +57,46 @@
       const addTaskList = [];
 
       // 関数まとめ
-      //li要素を全部消してリセットとli要素があった場合、li要素のテキストの幅を取得する
+      //li要素があった場合、li要素のテキストの幅を取得する
       function checkResetLi() {
         if (document.querySelector('.tasklist-item') !== null) {
           const taskTexts = document.getElementsByClassName('tasklist-item__text');//テキストリストのpタグ取得
           const taskTextStyle = window.getComputedStyle(taskTexts[0], '');//指定した要素のstyle情報取得
           const taskTextScale = taskTextStyle.getPropertyValue('width');//widhtの値を検出
-          taskList.innerHTML = '';
           return taskTextScale;
         }
       };
 
-      // タスクオブジェクトを繰り返し表示
+      // 初めてならタスクオブジェクトを繰り返し表示 2回目ならタスクアイテムの追加のみ
       function showList() {
-        for (let i = 0; i < addTaskList.length; i++) {
-          // ul＞li作成し＞indexとテキストのpと作業中と削除のbtn追加
-          const taskItem = document.createElement('li');
-          const indexText = document.createElement('p');
-          const taskText = document.createElement('p');
-          const workBtn = document.createElement('button');
-          const deconsteBtn = document.createElement('button');
-          taskItem.setAttribute('class', 'tasklist-item');
-          indexText.setAttribute('class', 'task-index');
-          taskText.setAttribute('class', 'tasklist-item__text');
-          workBtn.setAttribute('class', 'workbtn working');
-          deconsteBtn.setAttribute('class', 'deconstebtn');
-          indexText.textContent = i;
-          taskText.textContent = addTaskList[i].task;
-          workBtn.textContent = '作業中';
-          deconsteBtn.textContent = '削除';
-          taskItem.appendChild(indexText);
-          taskItem.appendChild(taskText);
-          taskList.appendChild(taskItem);
-          const taskListLi = document.querySelectorAll('#tasklist li')[i];//li位置確認
-          taskListLi.appendChild(workBtn);
-          taskListLi.appendChild(deconsteBtn);
-        };
+        // ul＞li作成し＞index,タスクテキストのpと作業中と削除のbtn追加
+        const taskItem = document.createElement('li');
+        const indexText = document.createElement('p');
+        const taskText = document.createElement('p');
+        const workBtn = document.createElement('button');
+        const deconsteBtn = document.createElement('button');
+        const taskItemNumber = document.querySelectorAll('.tasklist-item').length;
+        const taskItemCollection = taskList.children;
+        taskItem.setAttribute('class', 'tasklist-item');
+        indexText.setAttribute('class', 'task-index');
+        taskText.setAttribute('class', 'tasklist-item__text');
+        workBtn.setAttribute('class', 'workbtn working');
+        deconsteBtn.setAttribute('class', 'deconstebtn');
+        workBtn.textContent = '作業中';
+        deconsteBtn.textContent = '削除';
+        indexText.textContent = taskItemNumber;
+        taskText.textContent = addTaskList[taskItemNumber].task;
+        taskItem.appendChild(indexText);
+        taskItem.appendChild(taskText);
+        taskList.appendChild(taskItem);
+        //初回以外は追加したタスクアイテムへボタンを追加
+        if (taskItemCollection.length !== 0) {
+          taskItemCollection[taskItemNumber].appendChild(workBtn);
+          taskItemCollection[taskItemNumber].appendChild(deconsteBtn);
+        } else {
+          taskItem.appendChild(workBtn);
+          taskItem.appendChild(deconsteBtn);
+        }
       };
 
       //タスクリストのオブジェクトのtaskプロパティの文字数最大値を検出
@@ -130,19 +134,19 @@
           addTaskList.push(addTask);
         };
         addList(textBox.value);
-        const scale = checkResetLi();//リセットする前のテキストの幅を取得とli要素を全部消してリセット
-        showList();// タスクオブジェクトの表示
+        const scale = checkResetLi();//リセットする前のテキストの幅を取得
+        showList();// タスクアイテムの表示
         adjustTaskScale();//文字数に応じてタスクテキストスケールを変更する
         //テキストボックスを空白にする
         textBox.value = '';
       });
 
-      //削除ボタンクリックで要素とオブジェクト削除 状態ボタンクリックで状態テキスト変更
+      //削除ボタンクリックでbtn親要素とオブジェクト削除 状態ボタンクリックで状態テキスト変更
       taskList.addEventListener('click', e => {
         const deconsteElement = e.target.parentNode;// クリックされた親要素を取得
         if (e.target.className === 'deconstebtn') {//削除ボタンクリック
           const taskItemLists = Array.from(document.querySelectorAll('.tasklist-item'));//htmlコレクションを配列化
-          const index = taskItemLists.findIndex(taskItemList => taskItemList === deconsteElement);//クリックされた親要素（li）が何番目か検出
+          const index = taskItemLists.indexOf(deconsteElement);//クリックされた親要素（li）が何番目か検出
           addTaskList.splice(index, 1);//クリックされたオブジェクト削除
           deconsteElement.remove();//クリックされた親要素削除
           //削除したらindexの順番を変える
@@ -152,6 +156,7 @@
               taskIndex[i].textContent = i;
             };
           };
+          resetIndex();
           adjustTaskScale();
         } else if (e.target.className = 'workbtn') {//状態ボタンクリック
           if (e.target.textContent === '作業中') {
