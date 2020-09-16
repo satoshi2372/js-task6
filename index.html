@@ -29,26 +29,25 @@
 </head>
 <body>
   <h1>ToDoリスト</h1>
-  <form action="#">
-    <label for="all">
-      <input type="radio" id="all" name="sort" value="all" checked>すべて
-    </label>
-    <label for="working">
-      <input type="radio" id="working" value="working" name="sort">作業中
-    </label>
-    <label for="done">
-      <input type="radio" id="done" value="done" name="sort">完了
-    </label>
-    <p style="font-weight: bold;">ID コメント <span class="status-text">状態</span></p>
-    <ul id="tasklist" style="list-style: none;padding: 0;">
-    </ul>
-    <h2>新規タスクの追加</h2>
-    <input id="task-textbox" type="text">
-    <button id="add-btn">追加</button>
-  </form>
+  <label for="all">
+    <input type="radio" id="all" name="sort-radio" value="all" checked>すべて
+  </label>
+  <label for="working">
+    <input type="radio" id="working" value="working" name="sort-radio">作業中
+  </label>
+  <label for="done">
+    <input type="radio" id="done" value="done" name="sort-radio">完了
+  </label>
+  <p style="font-weight: bold;">ID コメント <span class="status-text">状態</span></p>
+  <ul id="tasklist" style="list-style: none;padding: 0;">
+  </ul>
+  <h2>新規タスクの追加</h2>
+  <input id="task-textbox" type="text">
+  <button id="add-btn">追加</button>
   <script>
-    'use strict'
+
     {
+      'use strict'
       //js課題③
       //DOMから要素を必要な要素取得とタスクを配列管理
       const addTaskBtn = document.getElementById('add-btn');
