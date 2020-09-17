@@ -38,6 +38,7 @@
   <label for="done">
     <input type="radio" id="done" value="done" name="sort-radio">完了
   </label>
+
   <p style="font-weight: bold;">ID コメント <span class="status-text">状態</span></p>
   <ul id="tasklist" style="list-style: none;padding: 0;">
   </ul>
@@ -125,6 +126,7 @@
         }
       };
 
+      //イベントまとめ
       //追加ボタンクリックでタスク追加
       addTaskBtn.addEventListener('click', () => {
         // タスクをオブジェクトと配列管理
@@ -135,6 +137,7 @@
         addList(textBox.value);
         const scale = checkResetLi();//リセットする前のテキストの幅を取得
         showList();// タスクアイテムの表示
+        checkRadioNum();//完了のradioチェック時には新規タスクは非表示にする
         adjustTaskScale();//文字数に応じてタスクテキストスケールを変更する
         //テキストボックスを空白にする
         textBox.value = '';
@@ -185,6 +188,21 @@
       function sortDone(text) {
         for (let i = 0; i < doneBtn.length; i++) {
           doneBtn[i].parentNode.style.display = text;
+        }
+      }
+      //完了radioチェック時には新規タスクは非表示にする。
+      //どのradioボタンが選択されたかを調べる
+      const radioList = document.getElementsByName('sort-radio');
+      function checkRadioNum() {
+        console.log(radioList);
+        for (let i = 0; i < radioList.length; i++) {
+          if (radioList[i].checked) {
+            if (radioList[i].value === 'done') {
+              console.log(radioList[i].value);
+              //新規タスクを非表示にする
+              sortWorking('none');
+            }
+          }
         }
       }
 
