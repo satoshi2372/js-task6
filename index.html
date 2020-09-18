@@ -126,6 +126,14 @@
         }
       };
 
+      //削除したらindexの順番を変える
+      function resetIndex() {
+        const taskIndex = document.querySelectorAll('.task-index');//タスクindexを管理してるテキストを検出
+        for (let i = 0; i < taskIndex.length; i++) {
+          taskIndex[i].textContent = i;
+        };
+      };
+
       //イベントまとめ
       //追加ボタンクリックでタスク追加
       addTaskBtn.addEventListener('click', () => {
@@ -137,10 +145,9 @@
         addList(textBox.value);
         const scale = checkResetLi();//リセットする前のテキストの幅を取得
         showList();// タスクアイテムの表示
-        checkRadioNum();//完了のradioチェック時には新規タスクは非表示にする
+        sortTaskList();//radioチェック状況によりタスクリストを表示・非表示にする
         adjustTaskScale();//文字数に応じてタスクテキストスケールを変更する
-        //テキストボックスを空白にする
-        textBox.value = '';
+        textBox.value = '';//テキストボックスを空白にする
       });
 
       //削除ボタンクリックでbtn親要素とオブジェクト削除 状態ボタンクリックで状態テキスト変更
@@ -151,34 +158,27 @@
           const index = taskItemLists.indexOf(deconsteElement);//クリックされた親要素（li）が何番目か検出
           addTaskList.splice(index, 1);//クリックされたオブジェクト削除
           deconsteElement.remove();//クリックされた親要素削除
-          //削除したらindexの順番を変える
-          function resetIndex() {
-            const taskIndex = document.querySelectorAll('.task-index');//タスクindexを管理してるテキストを検出
-            for (let i = 0; i < taskIndex.length; i++) {
-              taskIndex[i].textContent = i;
-            };
-          };
-          resetIndex();
+          resetIndex();//削除したらindexの順番を変える
           adjustTaskScale();
         } else if (e.target.className = 'workbtn') {//状態ボタンクリック
           if (e.target.textContent === '作業中') {
             e.target.textContent = '完了';
             e.target.classList.add('done');
+            sortTaskList();
           } else {
             e.target.textContent = '作業中';
             e.target.classList.add('working');
+            sortTaskList();
           }
         }
       });
 
       //ラジオボタンクリックで並べ替え
       //ラジオ要素取得
-      const ladioAll = document.getElementById('all');
-      const ladioWorking = document.getElementById('working');
-      const ladioDone = document.getElementById('done');
+      const radioList = document.getElementsByName('sort-radio');//radioグループ取得
       // 作業中ボタン要素取得
       const workingBtn = document.getElementsByClassName('working');
-      const doneBtn = document.getElementsByClassName('done')
+      const doneBtn = document.getElementsByClassName('done');
       //繰り返し処理まとめ 作業中ボタンの親要素を表示/非表示 完了ボタンの親要素を表示/非表示
       function sortWorking(text) {
         for (let i = 0; i < workingBtn.length; i++) {
@@ -190,37 +190,30 @@
           doneBtn[i].parentNode.style.display = text;
         }
       }
-      //完了radioチェック時には新規タスクは非表示にする。
-      //どのradioボタンが選択されたかを調べる
-      const radioList = document.getElementsByName('sort-radio');
-      function checkRadioNum() {
-        console.log(radioList);
+
+      //どのradioボタンが選択されたかを調べて表示、非表示にする。
+      function sortTaskList() {
         for (let i = 0; i < radioList.length; i++) {
           if (radioList[i].checked) {
-            if (radioList[i].value === 'done') {
-              console.log(radioList[i].value);
-              //新規タスクを非表示にする
+            if (radioList[i].value === 'done') {//完了のみ表示する
               sortWorking('none');
+              sortDone('block')
+            } else if (radioList[i].value === 'working') {//作業中のみ表示
+              sortWorking('block');
+              sortDone('none');
+            } else { //全て表示する
+              sortWorking('block');
+              sortDone('block')
             }
           }
         }
       }
-
-      //すべてradioクリックですべて表示
-      ladioAll.addEventListener('click', () => {
-        sortWorking('block');
-        sortDone('block');
-      });
-      //作業中radioクリック作業中のみ表示
-      ladioWorking.addEventListener('click', () => {
-        sortWorking('block');
-        sortDone('none');
-      });
-      //完了radioクリックで完了のみ表示
-      ladioDone.addEventListener('click', () => {
-        sortWorking('none');
-        sortDone('block');
-      });
+      //radioボタンクリック時にタスクをソートする
+      for (let i = 0; i < radioList.length; i++) {
+        radioList[i].addEventListener('click', () => {
+          sortTaskList();
+        });
+      }
     }
   </script>
 </body>
